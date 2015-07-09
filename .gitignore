@@ -58,3 +58,5 @@ target/
 # extra
 settings.ini
 python/
+
+var/
