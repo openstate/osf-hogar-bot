@@ -23,6 +23,7 @@
 ''' This provides commands for the politwoops bot '''
 
 import locale
+from HTMLParser import HTMLParser
 
 import requests
 
@@ -36,6 +37,20 @@ logger = logging.getLogger(__name__)
 
 locale.setlocale(locale.LC_ALL, 'nl_NL.UTF-8')
 
+
+class MLStripper(HTMLParser):
+    def __init__(self):
+        self.reset()
+        self.fed = []
+    def handle_data(self, d):
+        self.fed.append(d)
+    def get_data(self):
+        return ''.join(self.fed)
+
+def strip_tags(html):
+    s = MLStripper()
+    s.feed(html)
+    return s.get_data()
 
 def applicable_types():
 
@@ -150,4 +165,4 @@ def run(message):
         results['documents'][0]['canonical_url'],
     )
 
-    return output
+    return strip_tags(output)
