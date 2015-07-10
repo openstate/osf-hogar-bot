@@ -22,6 +22,8 @@
 
 ''' This provides commands for the politwoops bot '''
 
+import locale
+
 import requests
 
 from hogar.static import values as static_values
@@ -31,6 +33,8 @@ from hogar.Models.Logger import Logger
 
 import logging
 logger = logging.getLogger(__name__)
+
+locale.setlocale(locale.LC_ALL, 'nl_NL.UTF-8')
 
 
 def applicable_types():
@@ -139,11 +143,19 @@ def run(message):
             results = []
 
     if len(results) <= 0:
-        return 'No subsidies were found.'
+        return 'Geen subsidies gevonden.'
 
-    total = sum([float(r[4]) for r in results['data']])
+    sums = {}
+    for r in results['data']:
+        try:
+            sums[int(r[5])] += float(r[4])
+        except KeyError as e:
+            sums[int(r[5])] = float(r[4])
 
-    output = u'%s subsidies found for a total of %s ' % (
-        results['recordsFiltered'], total,)
+    output = u'%s subsidies gevonden : %s ' % (
+        results['recordsFiltered'],
+        u', '.join([u'%s: %s' % (
+            k, locale.currency(v, grouping=True),
+        ) for k, v in sums.iteritems()]),)
 
     return output
